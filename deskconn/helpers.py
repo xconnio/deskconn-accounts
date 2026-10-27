@@ -124,9 +124,7 @@ def verify_email_otp(
 
 
 def send_user_verification_email(user_email: str, code: str) -> None:
-    send_template_email(
-        user_email, EMAIL_TEMPLATE_VERIFICATION_CODE, {"CODE": code, "EXPIRY_MINUTES": OTP_EXPIRY_MINUTES}
-    )
+    send_template_email(user_email, EMAIL_TEMPLATE_VERIFICATION_CODE, {"CODE": code})
 
 
 def send_desktop_invite_email(inviter: str, invitee: str, desktop_name: str, role: str) -> None:
