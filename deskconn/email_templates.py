@@ -45,7 +45,7 @@ TEMPLATES: list[resend.Templates.CreateParams] = [
         "subject": "Your Deskconn verification code: {{{CODE}}}",
         "html": _layout(
             "Your verification code",
-            f"""<p {_P}>Your Deskconn verification code is <strong>{{{{{{CODE}}}}}}</strong>. Enter it in the app to continue.</p>
+            f"""<p {_P}>Your Deskconn verification code is:</p>
           <div style="margin:24px 0;padding:16px;background:#f3f4f6;border-radius:6px;text-align:center;
                       font-size:32px;font-weight:700;letter-spacing:8px;font-family:Menlo,Consolas,monospace;-webkit-user-select:all;user-select:all;cursor:pointer;">{{{{{{CODE}}}}}}</div>
           <p {_P}>Never share this code with anyone.</p>""",
