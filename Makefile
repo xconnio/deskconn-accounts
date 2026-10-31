@@ -31,7 +31,7 @@ lint:
 	./.venv/bin/ruff check .
 
 test:
-	./.venv/bin/pytest -s -v tests
+	./.venv/bin/python -m pytest -s -v tests
 
 clean:
 	rm -rf *.egg-info build
