@@ -31,18 +31,14 @@ lint:
 	./.venv/bin/ruff check .
 
 test:
-	./.venv/bin/pytest -s -v tests
+	./.venv/bin/python -m pytest -s -v tests
 
 clean:
 	rm -rf *.egg-info build
 
 run:
 	$(call check_defined,$(REQUIRED_VARS))
-	./.venv/bin/xcorn main:app \
-		--realm io.xconn.deskconn \
-		--url $(ROUTER_URL) \
-		--authid $(DESKCONN_ACCOUNT_AUTHID) \
-		--private-key $(DESKCONN_ACCOUNT_PRIVATE_KEY)
+	./.venv/bin/python main.py
 
 migration:
 	./.venv/bin/alembic revision --autogenerate -m "$(name)"

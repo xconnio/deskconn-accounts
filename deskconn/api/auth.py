@@ -1,7 +1,7 @@
-from xconn import Component
-from xconn.exception import ApplicationError
+from xconn_core import Component
+from xconn_core.exception import ApplicationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from xconn.types import Depends, Result
+from xconn_core.types import Depends, Result
 
 from deskconn import schemas, uris, helpers, models
 from deskconn.database.database import get_database

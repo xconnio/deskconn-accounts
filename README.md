@@ -6,6 +6,10 @@ Deskconn Account Service manages user accounts, devices, and desktop information
 
 Before starting this service, make sure the [Deskconn Router](https://github.com/xconnio/deskconn-router) is running.
 
+The service uses the published `xconn-core[framework]` Python package. Its wheels
+include the Rust runtime, so deployment needs no Rust toolchain. `make run` and
+the container start `main.py`, using the existing router and cryptosign settings.
+
 ## Setup Instructions
 
 1. Install dependencies:
@@ -54,7 +58,7 @@ Set these values in your `.env` for Docker (both stacks share the `deskconn` doc
 
 ```dotenv
 DESKCONN_POSTGRES_HOST=deskconn-account-service-postgres
-ROUTER_URL=rss://deskconn-router:8084/rs
+ROUTER_URL=rs://deskconn-router:8084/rs
 ```
 
 > **Note:** `make db` runs migrations from the host, so keep `DESKCONN_POSTGRES_HOST=localhost` while running it.

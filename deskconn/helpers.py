@@ -8,9 +8,9 @@ from datetime import datetime, timezone, timedelta
 
 import resend
 from dotenv import load_dotenv
-from xconn.exception import ApplicationError
-from xconn.async_session import AsyncSession
-from wampproto.auth.wampcra import derive_cra_key
+from xconn_core.exception import ApplicationError
+from xconn_core.async_client import AsyncSession
+from xconn_core.messages import call as protocol_call
 
 from deskconn import uris
 
@@ -67,7 +67,7 @@ def hash_password_and_generate_salt(password: str) -> Tuple[str, str]:
 
 
 def hash_password(password: str, salt: str) -> str:
-    return derive_cra_key(salt, password, ITERATIONS, KEY_LENGTH).decode()
+    return protocol_call("cra_derive", salt, password, ITERATIONS, KEY_LENGTH).decode()
 
 
 def verify_password(password: str, salt: str, hashed_password: str) -> bool:
@@ -158,7 +158,7 @@ def send_email(params: resend.Emails.SendParams) -> None:
 
 async def call_cloud_router_rpc(session: AsyncSession, uri: str, args: list[Any], error_message: str) -> None:
     try:
-        await session.call(uri, args)
+        await session.call(uri).args(*args).execute()
     except ApplicationError as app_err:
         raise ApplicationError(uris.ERROR_INTERNAL_ERROR, f"{error_message}. Error is: {app_err.args}")
     except Exception as err:
