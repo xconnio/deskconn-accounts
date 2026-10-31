@@ -4,7 +4,7 @@ from datetime import timezone, timedelta
 
 from sqlalchemy import select, exists, union_all, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from xconn.exception import ApplicationError
+from xconn_core.exception import ApplicationError
 
 from deskconn import models, schemas, helpers, uris
 from deskconn.database.backend import device as device_backend

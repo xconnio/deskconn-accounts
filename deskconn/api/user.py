@@ -1,7 +1,7 @@
-from xconn import Component, uris as xconn_uris
-from xconn.exception import ApplicationError
+from xconn_core import Component
+from xconn_core.exception import ApplicationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from xconn.types import Depends, CallDetails
+from xconn_core.types import Depends, CallDetails
 
 from deskconn import schemas, uris, helpers
 from deskconn.database.database import get_database
@@ -37,7 +37,7 @@ async def update(rs: schemas.UserUpdate, details: CallDetails, db: AsyncSession 
 
     data = rs.model_dump(exclude_none=True)
     if len(data) == 0:
-        raise ApplicationError(xconn_uris.ERROR_INVALID_ARGUMENT, "No field to update")
+        raise ApplicationError("wamp.error.invalid_argument", "No field to update")
 
     return await user_backend.update_user(db, db_user, data)
 
@@ -55,8 +55,11 @@ async def delete(details: CallDetails, db: AsyncSession = Depends(get_database))
     await user_backend.delete_user(db, db_user)
 
     for desktop in db_desktops:
-        await component.session.publish(
-            helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid), [authorized_keys], options={"acknowledge": True}
+        await (
+            component.session.publish(helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid))
+            .args(authorized_keys)
+            .options(acknowledge=True)
+            .execute()
         )
 
 

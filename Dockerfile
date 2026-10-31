@@ -29,4 +29,4 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 
-CMD ["sh", "-c", "xcorn main:app --realm io.xconn.deskconn --url \"$ROUTER_URL\" --authid \"$DESKCONN_ACCOUNT_AUTHID\" --private-key \"$DESKCONN_ACCOUNT_PRIVATE_KEY\""]
+CMD ["python", "main.py"]

@@ -1,9 +1,9 @@
 import uuid
 
-from xconn import Component, uris as xconn_uris
-from xconn.exception import ApplicationError
+from xconn_core import Component
+from xconn_core.exception import ApplicationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from xconn.types import Depends, CallDetails
+from xconn_core.types import Depends, CallDetails
 
 from deskconn import schemas, uris, models, helpers
 from deskconn.database.database import get_database
@@ -43,10 +43,11 @@ async def attach(rs: schemas.DesktopCreate, details: CallDetails, db: AsyncSessi
     # publish new keys to desktops
     desktop_authorizations = await desktop_backend.get_user_desktops_authid_with_authrole(db, db_user.id)
     for desktop_authid, authrole in desktop_authorizations:
-        await component.session.publish(
-            helpers.TOPIC_KEY_ADD.format(machine_id=desktop_authid),
-            [desktop.authid, desktop.public_key, authrole],
-            options={"acknowledge": True},
+        await (
+            component.session.publish(helpers.TOPIC_KEY_ADD.format(machine_id=desktop_authid))
+            .args(desktop.authid, desktop.public_key, authrole)
+            .options(acknowledge=True)
+            .execute()
         )
 
     return desktop
@@ -70,7 +71,7 @@ async def update(rs: schemas.DesktopUpdate, details: CallDetails, db: AsyncSessi
     data = rs.model_dump(exclude_none=True)
     data.pop("id", None)
     if len(data) == 0:
-        raise ApplicationError(xconn_uris.ERROR_INVALID_ARGUMENT, "No field to update")
+        raise ApplicationError("wamp.error.invalid_argument", "No field to update")
 
     db_desktop = await desktop_backend.get_user_desktop_by_id(db, rs.id, db_user)
     if db_desktop is None:
@@ -102,8 +103,10 @@ async def detach(rs: schemas.DesktopDetach, details: CallDetails, db: AsyncSessi
 
     await desktop_backend.delete_desktop(db, db_desktop)
 
-    await component.session.publish(
-        helpers.TOPIC_DESKTOP_DETACH.format(machine_id=db_desktop.authid), options={"acknowledge": True}
+    await (
+        component.session.publish(helpers.TOPIC_DESKTOP_DETACH.format(machine_id=db_desktop.authid))
+        .options(acknowledge=True)
+        .execute()
     )
 
     await helpers.call_cloud_router_rpc(
@@ -113,10 +116,11 @@ async def detach(rs: schemas.DesktopDetach, details: CallDetails, db: AsyncSessi
     # publish keys removal to desktops
     db_desktops = await desktop_backend.get_user_desktops(db, db_user.id)
     for desktop in db_desktops:
-        await component.session.publish(
-            helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid),
-            [{db_desktop.authid: [db_desktop.public_key]}],
-            options={"acknowledge": True},
+        await (
+            component.session.publish(helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid))
+            .args({db_desktop.authid: [db_desktop.public_key]})
+            .options(acknowledge=True)
+            .execute()
         )
 
 

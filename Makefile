@@ -38,11 +38,7 @@ clean:
 
 run:
 	$(call check_defined,$(REQUIRED_VARS))
-	./.venv/bin/xcorn main:app \
-		--realm io.xconn.deskconn \
-		--url $(ROUTER_URL) \
-		--authid $(DESKCONN_ACCOUNT_AUTHID) \
-		--private-key $(DESKCONN_ACCOUNT_PRIVATE_KEY)
+	./.venv/bin/python main.py
 
 migration:
 	./.venv/bin/alembic revision --autogenerate -m "$(name)"

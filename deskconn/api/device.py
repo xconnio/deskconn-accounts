@@ -1,7 +1,7 @@
-from xconn import Component
-from xconn.exception import ApplicationError
+from xconn_core import Component
+from xconn_core.exception import ApplicationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from xconn.types import Depends, CallDetails
+from xconn_core.types import Depends, CallDetails
 
 from deskconn import schemas, uris, helpers
 from deskconn.database.database import get_database
@@ -29,10 +29,11 @@ async def create(rs: schemas.DeviceCreate, details: CallDetails, db: AsyncSessio
     # publish new keys to desktops
     desktop_authorizations = await desktop_backend.get_user_desktops_authid_with_authrole(db, db_user.id)
     for desktop_authid, authrole in desktop_authorizations:
-        await component.session.publish(
-            helpers.TOPIC_KEY_ADD.format(machine_id=desktop_authid),
-            [db_user.email, device.public_key, authrole],
-            options={"acknowledge": True},
+        await (
+            component.session.publish(helpers.TOPIC_KEY_ADD.format(machine_id=desktop_authid))
+            .args(db_user.email, device.public_key, authrole)
+            .options(acknowledge=True)
+            .execute()
         )
 
     return device
@@ -67,8 +68,9 @@ async def delete(device_id: str, details: CallDetails, db: AsyncSession = Depend
     # publish keys removal to desktops
     db_desktops = await desktop_backend.get_user_desktops(db, db_user.id)
     for desktop in db_desktops:
-        await component.session.publish(
-            helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid),
-            [{db_user.email: [public_key]}],
-            options={"acknowledge": True},
+        await (
+            component.session.publish(helpers.TOPIC_KEY_REMOVE.format(machine_id=desktop.authid))
+            .args({db_user.email: [public_key]})
+            .options(acknowledge=True)
+            .execute()
         )
